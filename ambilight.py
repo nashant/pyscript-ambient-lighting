@@ -70,21 +70,27 @@ class AmbiLight():
                 return
 
             ambilight = state.get(self._id)
-            target_lux = value if var_name == ambilight.lux_target_id else state.get(ambilight.lux_target_id)
-            current_lux = value if var_name == ambilight.lux_sensor_id else state.get(ambilight.lux_sensor_id)
+            target_lux = int(float(value)) if var_name == ambilight.lux_target_id else int(float(state.get(ambilight.lux_target_id)))
+            current_lux = int(float(value)) if var_name == ambilight.lux_sensor_id else int(float(state.get(ambilight.lux_sensor_id)))
             light_lux = ambilight.light_lux
 
-            if float(current_lux) == float(target_lux):
+            if target_lux > 0 and target_lux < ambilight.lux_minimum:
+                log.debug(f"Target lux of {target_lux} for {self._id} lower then minimum of {ambilight.lux_minimum}, setting target_lux to {ambilight.lux_minimum}")
+                target_lux = ambilight.lux_minimum
+
+            if current_lux == target_lux:
                 log.debug(f"Taget lux reached for {self._id}")
                 return
 
+            minimum_brightness = 1 if current_lux < target_lux else 0
+
             log.debug(f"Triggered by {var_name}, target_lux: {target_lux}, current_lux: {current_lux}, light_lux: {light_lux}")
 
-            ambient_lux = int( float(current_lux) - float(light_lux) )
+            ambient_lux = current_lux - light_lux
             log.debug(f"Ambient lux for {ambilight.lux_sensor_id} is {ambient_lux}lx")
 
-            required_lux = int(float(target_lux)) - ambient_lux
-            required_brightness = int(self.lux_to_brightness(required_lux))
+            required_lux = target_lux - ambient_lux
+            required_brightness = max([ int(self.lux_to_brightness(required_lux)), minimum_brightness])
             log.debug(f"Lux required from {ambilight.light_id} is {required_lux}lx, brightness of {required_brightness}")
 
             target_brightness = min([ max([ required_brightness, 0 ]), 254 ])
