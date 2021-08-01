@@ -130,7 +130,7 @@ class AmbiLight():
             elif target_brightness == 0:
                 light.turn_off(entity_id=ambilight.light_id)
             else:
-                transition = 20 if light_on else 2
+                transition = 20 if light_on else 1
                 light.turn_on(entity_id=ambilight.light_id, brightness=target_brightness, transition=transition)
 
         self._triggers['update_light_lux'] = update_light_lux
