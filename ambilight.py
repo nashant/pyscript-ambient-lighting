@@ -63,7 +63,7 @@ class AmbiLight():
 
             self._setattr('light_lux', light_lux)
 
-        @state_trigger(al.lux_sensor_id, al.lux_target_id)
+        @state_trigger(f"{al.lux_sensor_id} != {al.lux_sensor_id}.old", al.lux_target_id)
         def update_target_brightness(var_name=None, value=None):
             if 'light_lux' not in state.getattr(self._id):
                 log.info(f"light_lux not yet set for {self._id}, try changing the light brightness")
